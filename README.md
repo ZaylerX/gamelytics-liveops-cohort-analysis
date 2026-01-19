@@ -94,28 +94,7 @@ The complete raw dataset is available on Kaggle:
 This setup reflects common industry practices where:
 - raw logs are stored in data warehouses
 - analysts work on processed and aggregated datasets
-
----
-
-## 📂 Repository Structure
-gaming-liveops-cohort-analysis/
-│
-├── data/
-│ ├── raw/ # Sample raw data
-│ └── processed/ # Clean datasets and SQLite DB
-│
-├── notebooks/
-│ └── data_cleaning.ipynb # Data cleaning and preparation
-│
-├── sql/
-│ └── gaming_liveops_analysis.sql # All cohort and monetization views
-│
-├── dashboard/
-│ └── tableau_public_link.txt
-│
-└── README.md
-
-
+- 
 ---
 
 ## 🛠 Tools Used
