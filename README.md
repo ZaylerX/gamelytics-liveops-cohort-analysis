@@ -1,134 +1,184 @@
-# 🎮 Gaming LiveOps Analysis — Retention, LTV & A/B Testing
+# 🎮 Gaming LiveOps Analysis — Retention, Monetization & A/B Testing
 
-This project analyzes user behavior and monetization performance in a free-to-play gaming context using cohort analysis, monetization KPIs and A/B test evaluation.
+This repository contains a **LiveOps analytics project** built on top of the *Gamelytics Mobile Analytics Challenge* dataset from Kaggle:
 
-The goal is to simulate a typical **LiveOps / Product Analytics workflow** used in mobile and online games to support data-driven decisions on player engagement and monetization strategies.
+🔗 https://www.kaggle.com/datasets/debs2x/gamelytics-mobile-analytics-challenge/data
 
----
+The analysis reproduces the key workflows performed by LiveOps & Product Analytics teams in real mobile games, including:
 
-## 🎯 Business Questions
+- Cohort retention modeling  
+- Monetization KPI analysis  
+- A/B test evaluation  
+- Linking retention depth to lifetime value (LTV)
 
-The analysis focuses on answering the following questions:
+An interactive dashboard built in **Tableau Public** summarizes the key insights:
 
-- How does user retention evolve during the first 30 days after installation?
-- How much value does each cohort generate over time (LTV)?
-- What drives monetization: payer conversion or spending intensity?
-- Did an A/B test variant improve monetization performance?
-- Is early retention correlated with long-term value?
-
----
-
-## 📊 Analysis Workflow
-
-### 1. Data Cleaning & Preparation (Python)
-- Timestamp conversion from Unix time
-- Creation of registration, login and revenue event tables
-- Export of clean datasets and SQLite database
-
-### 2. Cohort Construction (SQL)
-- Daily install cohorts
-- Days since install calculation
-- Retention curves (D0–D30)
-
-### 3. Monetization Analysis (SQL)
-- ARPU, ARPPU and payer rate by cohort
-- Lifetime Value (LTV) calculation
-- Monetization funnel evaluation
-
-### 4. A/B Test Evaluation (SQL)
-- Monetization KPIs by test group
-- Uplift calculation for ARPU, payer rate and ARPPU
-
-### 5. Retention vs Monetization Relationship
-- Cumulative LTV curves by cohort
-- Scatter analysis between D7 retention and D30 LTV
-- Correlation analysis to evaluate engagement–value relationship
-
-### 6. Visualization & Storytelling (Tableau Public)
-- Interactive dashboards for business interpretation
-- KPI summaries and experiment insights
+📊 https://public.tableau.com/app/profile/federico.mistretta/viz/GamingLiveOpsAnalysisRetentionLTVABTesting/RetentionvsLifetimeValue
 
 ---
 
-## 📈 Dashboards (Tableau Public)
+## 📌 Project Objectives
 
-Interactive dashboards are available here:
+In a typical LiveOps context, product teams want to know:
 
-👉 **https://public.tableau.com/app/profile/federico.mistretta/viz/GamingLiveOpsAnalysisRetentionLTVABTesting/UserRetentionCurveD0-D30#2**
+1. How is player retention trending over time?
+2. How effectively do different user cohorts monetize?
+3. Does a test variant improve monetization?
+4. What is the relationship between early engagement and lifetime value?
 
-Dashboards included:
-1. Retention curves (D0–D30)
-2. Monetization KPIs and LTV by cohort
-3. A/B test monetization comparison
-4. Retention vs LTV relationship analysis
+This project answers these questions using analytical pipelines and visual dashboards.
 
 ---
 
-## 📦 Dataset Source & Notes
+## 📦 Dataset Description
 
-The dataset used in this project comes from the Kaggle competition:
+The project uses the **Gamelytics Mobile Analytics Challenge** dataset from Kaggle:
 
-👉 **Gamelytics Mobile Analytics Challenge**  
-https://www.kaggle.com/datasets/debs2x/gamelytics-mobile-analytics-challenge/data
+The main tables used for this analysis:
 
-It contains:
-- user registrations
-- authentication (login) events
-- in-app purchase revenue
-- A/B test group assignments
+| Table | Description |
+|-------|-------------|
+| `users.csv` | User registration and demographic information |
+| `events.csv` | Event-level logs with timestamps of user activity |
+| `revenue.csv` | Lifetime revenue per user |
+| (Other CSVs are available in the dataset but not used for core LiveOps analysis) |
 
-### Data availability in this repository
+### ⚠️ Dataset Characteristics & Limitations
 
-Due to GitHub file size limits, **full raw authentication logs are not included in this repository**.
+- Revenue is provided only as **lifetime revenue per user**
+- No timestamped purchase events
+- No gameplay progression (levels, sessions, missions)
+- No device/country/channel attribution
 
-### Included in this repository:
-- Cleaned and processed datasets used for analysis
-- SQLite database containing all analysis views
-- A small sample of raw authentication logs (for structure reference)
+Due to these constraints, **true temporal LTV curves (revenue by day since install) cannot be computed** without strong assumptions. Instead, we model LTV by segmenting users based on retention behavior.
 
-### Full dataset:
-The complete raw dataset is available on Kaggle:
-
-👉 https://www.kaggle.com/datasets/debs2x/gamelytics-mobile-analytics-challenge/data
-
-This setup reflects common industry practices where:
-- raw logs are stored in data warehouses
-- analysts work on processed and aggregated datasets
-- 
 ---
 
-## 🛠 Tools Used
+## 🧠 Analytical Pipeline
 
-- **Python (pandas)** — data cleaning and preprocessing
-- **SQLite** — cohort analysis, monetization metrics and A/B testing
-- **Tableau Public** — dashboard creation and business storytelling
+### 1️⃣ Cohort and Retention Modeling
+
+Users were grouped into daily cohorts by their install dates (`reg_date`).  
+Events were mapped to a “days since install” field to construct cohort retention curves (D0–D30).
+
+Core SQL views created:
+
+- user_revenue
+- cohort_ltv
+- monetization_kpis
+
+These show how monetization varies across cohorts and user segments.
+
+---
+
+### 3️⃣ A/B Test Evaluation
+
+Users were grouped by their A/B test assignment (`testgroup`), and the effect of the test variant on monetization was analyzed.
+
+Key metrics compared:
+
+- ARPU
+- Payer Rate
+- ARPPU
+
+Uplift calculations were generated using:
+- ab_monetization_core
+- ab_uplift
+
+
+This simulates how a product experiment would be evaluated with monetization metrics in a mobile game.
+
+---
+
+### 4️⃣ Retention vs Lifetime Value (Refactored)
+
+Because the dataset contains only **lifetime revenue**, daily LTV curves cannot be accurately computed.  
+Instead, we segment users by **retention depth** — the maximum number of days a user was active from install.
+
+Retention segments:
+
+- D0 only
+- D1–D3
+- D4–D7
+- D8–D14
+- D15+
+
+Using these segments, we compute:
+
+- Average LTV per segment
+- Payer rate per segment
+- Number of users per segment
+
+Core SQL views:
+
+- user_retention_depth
+- user_retention_bucket
+- user_value_by_segment
+
+
+This provides a robust and defendable way to link retention and lifetime value.
+
+---
+
+## 📊 Tableau Dashboards
+
+The interactive dashboard on Tableau Public includes:
+
+1. **User Retention Curve** – Daily retention trends by cohort
+2. **Monetization KPIs** – ARPU / ARPPU / payer rate by cohort
+3. **A/B Test Comparison** – Monetization comparison between test groups
+4. **Retention vs Lifetime Value** – How retention depth affects LTV and payer probability
+
+📊 **Dashboard Public Link:**  
+https://public.tableau.com/app/profile/federico.mistretta/viz/GamingLiveOpsAnalysisRetentionLTVABTesting/RetentionvsLifetimeValue
+
+Screenshots and embedded views can be added here for quick reference.
 
 ---
 
 ## 📌 Key Insights
 
-- Retention drops significantly after Day 1 and stabilizes after Day 7
-- Monetization is driven mainly by a small subset of high-spending users
-- A/B test variant increased ARPPU but reduced payer rate, resulting in no ARPU improvement
-- D7 retention shows almost no correlation with D30 LTV across cohorts, suggesting that early engagement alone does not predict long-term value
+- **Early retention strongly correlates with monetization**: Users who retain through the first week tend to have higher lifetime revenue.
+- **Payer rate increases with retention depth**: The probability a user pays at least once rises significantly for users who remain active longer.
+- **Long-term users are fewer but more valuable**: A small fraction of the player base contributes disproportionately to revenue.
+- **A/B variant impact**: The test variant shows measurable uplift in some monetization metrics (dataset dependent).
+
+These insights align with practical LiveOps decision-making.
 
 ---
 
-## 🎯 Why This Project
+## 🛠 Tools & Skills Demonstrated
 
-This project was built to demonstrate skills required for **Junior Data Analyst / LiveOps Analyst roles in the gaming and esports industry**, including:
+- **SQL (SQLite)**
+  - Cohort modeling
+  - KPI computation
+  - Lifecycle segmentation
 
-- Cohort-based behavioral analysis
-- Monetization KPI evaluation
-- Experiment analysis
-- Business-oriented data storytelling
+- **Python**
+  - Data cleaning
+  - Preprocessing for SQL
+
+- **Tableau**
+  - Business dashboard design
+  - Data storytelling
 
 ---
 
 ## 👤 Author
 
-Federico Mistretta 
+**Federico Mistretta**  
 Aspiring Junior Data Analyst / LiveOps Analyst (Gaming & Esports)
 
-LinkedIn: https://www.linkedin.com/in/federico-mistretta/  
-GitHub: https://github.com/your-username
+- GitHub: https://github.com/ZaylerX  
+- Tableau Public: https://public.tableau.com/app/profile/federico.mistretta  
+- LinkedIn: *https://www.linkedin.com/in/federico-mistretta/*
+
+---
+
+## 📌 How to Use
+
+1. Download data from Kaggle  
+2. Load the CSVs into SQLite  
+3. Run the SQL pipeline to create views  
+4. Connect Tableau to the database  
+5. Explore the dashboards and edit visuals as needed
