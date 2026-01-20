@@ -34,13 +34,15 @@ This project answers these questions using analytical pipelines and visual dashb
 
 The project uses the **Gamelytics Mobile Analytics Challenge** dataset from Kaggle:
 
+https://www.kaggle.com/datasets/debs2x/gamelytics-mobile-analytics-challenge/data
+
 The main tables used for this analysis:
 
 | Table | Description |
 |-------|-------------|
-| `users.csv` | User registration and demographic information |
-| `events.csv` | Event-level logs with timestamps of user activity |
-| `revenue.csv` | Lifetime revenue per user |
+| `reg_data.csv` | User registration and demographic information |
+| `auth_data.csv` | Event-level logs with timestamps of user activity |
+| `ab_test.csv` | Lifetime revenue per user |
 | (Other CSVs are available in the dataset but not used for core LiveOps analysis) |
 
 ### ⚠️ Dataset Characteristics & Limitations
@@ -131,8 +133,6 @@ The interactive dashboard on Tableau Public includes:
 
 📊 **Dashboard Public Link:**  
 https://public.tableau.com/app/profile/federico.mistretta/viz/GamingLiveOpsAnalysisRetentionLTVABTesting/RetentionvsLifetimeValue
-
-Screenshots and embedded views can be added here for quick reference.
 
 ---
 
